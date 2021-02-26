@@ -1,7 +1,7 @@
 {
   "name": "bptf-listing-service",
-  "description": "",
-  "author": "",
+  "description": "Service responsible for saving listings of items from backpack.tf",
+  "author": "Nicklas Marc Pedersen",
   "private": true,
   "license": "MIT",
   "scripts": {
