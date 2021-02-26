@@ -64,7 +64,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ needs.release.outputs.new_release_version }}
+            ghcr.io/nicklason/bptf-listing-service:latest
+            ghcr.io/nicklason/bptf-listing-service:${{ needs.release.outputs.new_release_version }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
