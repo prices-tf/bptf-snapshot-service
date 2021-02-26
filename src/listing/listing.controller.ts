@@ -13,11 +13,22 @@ import { ListingService } from './listing.service';
 
 // TODO: Validate sku?
 
-// TODO: Request listings to be updated using queue
-
 @Controller('listings')
 export class ListingController {
   constructor(private readonly listingService: ListingService) {}
+
+  @Post('/:sku/refresh')
+  async enqueueSnapshot(
+    @Param('sku') sku: string,
+  ): Promise<{
+    enqueued: boolean;
+  }> {
+    await this.listingService.enqueueSnapshot(sku);
+
+    return {
+      enqueued: true,
+    };
+  }
 
   @Get('/:sku')
   async getListingsForItem(@Param('sku') sku: string): Promise<Snapshot> {

@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import configuration, { DatabaseConfig } from './common/config/configuration';
+import configuration, {
+  DatabaseConfig,
+  QueueConfig,
+} from './common/config/configuration';
 import { validation } from './common/config/validation';
 import { Listing } from './listing/models/listing.entity';
 import { Snapshot } from './listing/models/snapshot.entity';
 import { ListingModule } from './listing/listing.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -32,6 +36,22 @@ import { ListingModule } from './listing/listing.module';
           autoLoadModels: true,
           synchronize: process.env.TYPEORM_SYNCRONIZE === 'true',
           keepConnectionAlive: true,
+        };
+      },
+    }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const queueConfig = configService.get<QueueConfig>('queue');
+
+        return {
+          redis: {
+            host: queueConfig.host,
+            port: queueConfig.port,
+            password: queueConfig.password,
+          },
+          prefix: 'bull',
         };
       },
     }),

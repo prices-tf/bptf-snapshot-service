@@ -9,7 +9,10 @@ describe('ListingService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        ListingService,
+        {
+          provide: ListingService,
+          useValue: {},
+        },
         {
           provide: getRepositoryToken(Snapshot),
           useValue: {},

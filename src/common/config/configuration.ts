@@ -1,6 +1,7 @@
 export interface Config {
   port: number;
   database: DatabaseConfig;
+  queue: QueueConfig;
 }
 
 export interface DatabaseConfig {
@@ -9,6 +10,12 @@ export interface DatabaseConfig {
   username: string;
   password: string;
   database: string;
+}
+
+export interface QueueConfig {
+  host: string;
+  port: number;
+  password: string;
 }
 
 export default (): Config => {
@@ -23,6 +30,11 @@ export default (): Config => {
       username: process.env.POSTGRES_USERNAME,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
-    }
+    },
+    queue: {
+      host: process.env.QUEUE_HOST,
+      port: parseInt(process.env.QUEUE_PORT, 10),
+      password: process.env.QUEUE_PASSWORD,
+    },
   };
 };

@@ -4,13 +4,45 @@ import { getConnection, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
 import { Listing } from './models/listing.entity';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class ListingService {
   constructor(
     @InjectRepository(Snapshot)
     private snapshotRepository: Repository<Snapshot>,
+    @InjectQueue('snapshot')
+    private snapshotQueue: Queue,
   ) {}
+
+  async enqueueSnapshot(sku: string): Promise<void> {
+    const jobId = sku;
+
+    const oldJob = await this.snapshotQueue.getJob(jobId);
+
+    if (oldJob.finishedOn !== undefined) {
+      try {
+        await oldJob.remove();
+      } catch (error) {
+        // This might error for some reason, so catching it here
+      }
+    }
+
+    await this.snapshotQueue.add(
+      {
+        sku,
+      },
+      {
+        jobId: sku,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+      },
+    );
+  }
 
   getListingsBySKU(sku: string): Promise<Snapshot> {
     return this.snapshotRepository.findOne({
