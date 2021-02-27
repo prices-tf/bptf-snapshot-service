@@ -13,7 +13,9 @@ export class ListingService {
     @InjectRepository(Snapshot)
     private snapshotRepository: Repository<Snapshot>,
     @InjectQueue('snapshot')
-    private snapshotQueue: Queue,
+    private snapshotQueue: Queue<{
+      sku: string;
+    }>,
   ) {}
 
   async enqueueSnapshot(sku: string): Promise<void> {
@@ -21,7 +23,7 @@ export class ListingService {
 
     const oldJob = await this.snapshotQueue.getJob(jobId);
 
-    if (oldJob.finishedOn !== undefined) {
+    if (oldJob?.finishedOn !== undefined) {
       try {
         await oldJob.remove();
       } catch (error) {
