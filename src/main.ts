@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { Config } from './common/config/configuration';
+import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -12,6 +13,7 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
+  app.use(bodyParser.json({ limit: '100mb' }));
   await app.listen(configService.get<number>('port'));
 }
 bootstrap();
