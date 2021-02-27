@@ -20,11 +20,10 @@ class ItemAttributeDto {
   @IsInt()
   readonly defindex: number;
 
-  @IsDefined()
-  @IsInt()
-  readonly value: number;
+  @IsOptional()
+  readonly value: number | string;
 
-  @IsDefined()
+  @IsOptional()
   @IsNumber()
   readonly float_value: number;
 }
@@ -62,7 +61,7 @@ class ItemDto {
   readonly inventory: number;
 
   @ValidateIf((o) => o.id !== undefined)
-  @IsDefined()
+  @IsOptional()
   @IsInt()
   readonly quantity: number;
 
