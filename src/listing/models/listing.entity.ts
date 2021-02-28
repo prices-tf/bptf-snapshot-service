@@ -27,7 +27,9 @@ export class Listing {
   @Column()
   readonly isAutomatic: boolean;
 
-  @Column()
+  @Column({
+    type: 'decimal',
+  })
   readonly currenciesKeys: number;
 
   @Column({
