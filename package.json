@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --maxWorkers=1"
   },
   "dependencies": {
+    "@golevelup/nestjs-rabbitmq": "^1.16.0",
     "@nestjs/bull": "^0.3.1",
     "@nestjs/common": "^7.5.1",
     "@nestjs/config": "^0.6.3",

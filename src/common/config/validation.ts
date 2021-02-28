@@ -12,6 +12,10 @@ const validation = Joi.object({
   QUEUE_HOST: Joi.string().required(),
   QUEUE_PORT: Joi.number().required(),
   QUEUE_PASSWORD: Joi.string().required(),
+  RABBITMQ_HOST: Joi.string().required(),
+  RABBITMQ_PORT: Joi.number().required(),
+  RABBITMQ_USERNAME: Joi.string().required(),
+  RABBITMQ_PASSWORD: Joi.string().required(),
 });
 
 export { validation };

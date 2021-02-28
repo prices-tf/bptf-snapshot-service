@@ -2,6 +2,7 @@ export interface Config {
   port: number;
   database: DatabaseConfig;
   queue: QueueConfig;
+  rabbitmq: RabbitMQConfig;
 }
 
 export interface DatabaseConfig {
@@ -15,6 +16,13 @@ export interface DatabaseConfig {
 export interface QueueConfig {
   host: string;
   port: number;
+  password: string;
+}
+
+export interface RabbitMQConfig {
+  host: string;
+  port: number;
+  username: string;
   password: string;
 }
 
@@ -35,6 +43,12 @@ export default (): Config => {
       host: process.env.QUEUE_HOST,
       port: parseInt(process.env.QUEUE_PORT, 10),
       password: process.env.QUEUE_PASSWORD,
+    },
+    rabbitmq: {
+      host: process.env.RABBITMQ_HOST,
+      port: parseInt(process.env.RABBITMQ_PORT, 10),
+      username: process.env.RABBITMQ_USERNAME,
+      password: process.env.RABBITMQ_PASSWORD,
     },
   };
 };
