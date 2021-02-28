@@ -57,6 +57,10 @@ export class ListingService {
     });
   }
 
+  getSnapshots(): Promise<Snapshot[]> {
+    return this.snapshotRepository.find();
+  }
+
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
     // const snapshot = this.snapshotRepository.create(createSnapshot);
 

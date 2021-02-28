@@ -17,6 +17,11 @@ import { ListingService } from './listing.service';
 export class ListingController {
   constructor(private readonly listingService: ListingService) {}
 
+  @Get()
+  getAllSnapshots(): Promise<Snapshot[]> {
+    return this.listingService.getSnapshots();
+  }
+
   @Post('/:sku/refresh')
   async enqueueSnapshot(
     @Param('sku') sku: string,
