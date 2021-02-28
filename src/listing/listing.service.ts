@@ -7,6 +7,11 @@ import { Listing } from './models/listing.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import {
+  paginate,
+  Pagination,
+  IPaginationOptions,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class ListingService {
@@ -57,8 +62,8 @@ export class ListingService {
     });
   }
 
-  getSnapshots(): Promise<Snapshot[]> {
-    return this.snapshotRepository.find();
+  getSnapshots(options: IPaginationOptions): Promise<Pagination<Snapshot>> {
+    return paginate<Snapshot>(this.snapshotRepository, options);
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
