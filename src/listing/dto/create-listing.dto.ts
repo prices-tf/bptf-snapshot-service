@@ -71,7 +71,7 @@ class ItemDto {
   readonly origin: number;
 
   @ValidateIf((o) => o.id !== undefined)
-  @IsDefined()
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ItemAttributeDto)
