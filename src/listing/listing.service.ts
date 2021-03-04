@@ -43,7 +43,7 @@ export class ListingService {
         sku,
       },
       {
-        jobId: sku,
+        jobId,
         attempts: 3,
         backoff: {
           type: 'exponential',
