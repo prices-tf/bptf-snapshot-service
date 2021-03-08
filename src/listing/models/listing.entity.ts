@@ -28,7 +28,7 @@ export class Listing {
   readonly isAutomatic: boolean;
 
   @Column({
-    type: 'decimal',
+    type: 'float',
   })
   readonly currenciesKeys: number;
 
