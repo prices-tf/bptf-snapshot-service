@@ -11,6 +11,7 @@ import { Listing } from './listing/models/listing.entity';
 import { Snapshot } from './listing/models/snapshot.entity';
 import { ListingModule } from './listing/listing.module';
 import { BullModule } from '@nestjs/bull';
+import IORedis from 'ioredis';
 
 @Module({
   imports: [
@@ -46,12 +47,28 @@ import { BullModule } from '@nestjs/bull';
       useFactory: (configService: ConfigService<Config>) => {
         const queueConfig = configService.get<QueueConfig>('queue');
 
-        return {
-          redis: {
+        let redisConfig: IORedis.RedisOptions;
+
+        if (queueConfig.isSentinel) {
+          redisConfig = {
+            sentinels: [
+              {
+                host: queueConfig.host,
+                port: queueConfig.port,
+              },
+            ],
+            name: queueConfig.set,
+          };
+        } else {
+          redisConfig = {
             host: queueConfig.host,
             port: queueConfig.port,
             password: queueConfig.password,
-          },
+          };
+        }
+
+        return {
+          redis: redisConfig,
           prefix: 'bull',
         };
       },
