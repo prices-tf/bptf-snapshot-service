@@ -7,11 +7,6 @@ import {
 } from '@nestjs/terminus';
 import { Queue } from 'bull';
 
-export interface Dog {
-  name: string;
-  type: string;
-}
-
 @Injectable()
 export class BullHealthIndicator extends HealthIndicator {
   constructor(
