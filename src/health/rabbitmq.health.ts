@@ -6,11 +6,6 @@ import {
   HealthCheckError,
 } from '@nestjs/terminus';
 
-export interface Dog {
-  name: string;
-  type: string;
-}
-
 @Injectable()
 export class RabbitMQHealthIndicator extends HealthIndicator {
   constructor(private readonly amqpConnection: AmqpConnection) {
