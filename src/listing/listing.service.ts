@@ -49,6 +49,8 @@ export class ListingService {
           type: 'exponential',
           delay: 5000,
         },
+        removeOnComplete: true,
+        removeOnFail: 10,
       },
     );
   }
