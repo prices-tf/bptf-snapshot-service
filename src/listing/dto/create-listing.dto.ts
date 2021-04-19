@@ -24,8 +24,7 @@ class ItemAttributeDto {
   readonly value: number | string;
 
   @IsOptional()
-  @IsNumber()
-  readonly float_value: number;
+  readonly float_value: number | string;
 }
 
 class ItemDto {
