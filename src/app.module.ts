@@ -71,6 +71,10 @@ import { HealthModule } from './health/health.module';
         return {
           redis: redisConfig,
           prefix: 'bull',
+          limiter: {
+            max: 1,
+            duration: 1000,
+          },
         };
       },
     }),
