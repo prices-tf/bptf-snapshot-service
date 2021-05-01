@@ -115,6 +115,10 @@ export class CreateListingDto {
   readonly isAutomatic: boolean;
 
   @IsDefined()
+  @IsBoolean()
+  readonly isOffers: boolean;
+
+  @IsDefined()
   @IsDate()
   @Type(() => Date)
   readonly createdAt: Date;

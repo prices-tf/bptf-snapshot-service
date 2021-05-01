@@ -115,6 +115,7 @@ export class ListingService {
               currenciesKeys: listing.currencies.keys,
               currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
               isAutomatic: listing.isAutomatic,
+              isOffers: listing.isOffers,
               createdAt: listing.createdAt,
               bumpedAt: listing.bumpedAt,
               snapshot,

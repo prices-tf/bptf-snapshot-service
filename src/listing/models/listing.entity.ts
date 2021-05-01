@@ -27,6 +27,9 @@ export class Listing {
   @Column()
   readonly isAutomatic: boolean;
 
+  @Column()
+  readonly isOffers: boolean;
+
   @Column({
     type: 'float',
   })
