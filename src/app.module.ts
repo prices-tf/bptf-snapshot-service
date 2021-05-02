@@ -13,6 +13,7 @@ import { ListingModule } from './listing/listing.module';
 import { BullModule } from '@nestjs/bull';
 import IORedis from 'ioredis';
 import { HealthModule } from './health/health.module';
+import { RabbitMQWrapperModule } from './rabbitmq-wrapper/rabbitmq-wrapper.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { HealthModule } from './health/health.module';
         };
       },
     }),
+    RabbitMQWrapperModule,
     HealthModule,
     ListingModule,
   ],
