@@ -1,4 +1,4 @@
-FROM node:15-alpine as builder
+FROM node:16-alpine as builder
 
 ENV NODE_ENV build
 
@@ -13,7 +13,7 @@ COPY ./src .
 
 RUN npm run build
 
-FROM node:15-alpine
+FROM node:16-alpine
 LABEL org.opencontainers.image.source https://github.com/Nicklason/bptf-listing-service
 
 ENV NODE_ENV production
