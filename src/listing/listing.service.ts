@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
 import { Listing } from './models/listing.entity';
 import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import Bull, { Queue } from 'bull';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import {
   paginate,
@@ -25,7 +25,7 @@ export class ListingService {
     private readonly amqpConnection: AmqpConnection,
   ) {}
 
-  async enqueueSnapshot(sku: string): Promise<void> {
+  async enqueueSnapshot(sku: string, delay?: number): Promise<void> {
     const jobId = sku;
 
     const oldJob = await this.snapshotQueue.getJob(jobId);
@@ -38,20 +38,28 @@ export class ListingService {
       }
     }
 
+    const options: Bull.JobOptions = {
+      jobId,
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000,
+      },
+      removeOnComplete: true,
+      removeOnFail: 10,
+    };
+
+    if (delay !== undefined) {
+      options.delay = delay;
+    }
+
+    console.log(options);
+
     await this.snapshotQueue.add(
       {
         sku,
       },
-      {
-        jobId,
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-        removeOnComplete: true,
-        removeOnFail: 10,
-      },
+      options,
     );
   }
 

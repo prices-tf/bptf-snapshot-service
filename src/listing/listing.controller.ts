@@ -12,6 +12,7 @@ import {
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Snapshot } from '../listing/models/snapshot.entity';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
+import { RefreshSnapshotQueryDto } from './dto/refresh-snapshot-query.dto';
 import { ListingService } from './listing.service';
 
 // TODO: Validate sku?
@@ -34,10 +35,16 @@ export class ListingController {
   @Post('/:sku/refresh')
   async enqueueSnapshot(
     @Param('sku') sku: string,
+    @Query(
+      new ValidationPipe({
+        transform: true,
+      }),
+    )
+    query: RefreshSnapshotQueryDto,
   ): Promise<{
     enqueued: boolean;
   }> {
-    await this.listingService.enqueueSnapshot(sku);
+    await this.listingService.enqueueSnapshot(sku, query.delay);
 
     return {
       enqueued: true,
