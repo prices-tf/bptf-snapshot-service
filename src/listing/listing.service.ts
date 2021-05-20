@@ -53,8 +53,6 @@ export class ListingService {
       options.delay = delay;
     }
 
-    console.log(options);
-
     await this.snapshotQueue.add(
       {
         sku,
