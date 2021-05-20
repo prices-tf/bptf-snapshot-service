@@ -1,4 +1,10 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Listing } from './listing.entity';
 
 @Entity()
@@ -6,6 +12,7 @@ export class Snapshot {
   @PrimaryGeneratedColumn('uuid')
   readonly id: string;
 
+  @Index()
   @Column({
     unique: true,
   })
