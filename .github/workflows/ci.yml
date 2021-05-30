@@ -28,7 +28,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: npm install
+      - name: npm install --no-audit
         run: npm ci
       - name: npm build
         run: npm run build
@@ -51,7 +51,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: npm install
+      - name: npm install --no-audit
         run: npm ci
       - name: npm test
         run: npm run test
@@ -76,7 +76,7 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-      - name: npm install
+      - name: npm install --no-audit
         run: npm ci
       - name: Run tests
         run: npm run test:e2e

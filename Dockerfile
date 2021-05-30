@@ -7,7 +7,7 @@ WORKDIR /usr/app
 COPY ./package.json ./package-lock.json ./
 COPY ./tsconfig.build.json ./tsconfig.json ./
 
-RUN npm ci
+RUN npm ci --no-audit
 
 COPY ./src .
 
@@ -21,7 +21,7 @@ WORKDIR /usr/app
 
 COPY --from=builder /usr/app/package.json /usr/app/package-lock.json ./
 
-RUN npm ci
+RUN npm ci --no-audit
 
 COPY --from=builder /usr/app/dist ./dist
 
