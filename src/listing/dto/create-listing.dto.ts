@@ -15,16 +15,28 @@ import {
 import { IsSteamID64 } from '../../common/decorator/validation/IsSteamID64';
 import { ListingIntent } from '../enums/listing-intent.enum';
 
+class ItemAttributeAccountInfoDto {
+  @IsDefined()
+  steamid: number;
+
+  @IsDefined()
+  @IsString()
+  personaname: string;
+}
+
 class ItemAttributeDto {
   @IsDefined()
-  @IsInt()
-  readonly defindex: number;
+  readonly defindex: number | string;
 
   @IsOptional()
-  readonly value: number | string;
+  readonly value: number | string | null;
 
   @IsOptional()
   readonly float_value: number | string;
+
+  @IsOptional()
+  @Type(() => ItemAttributeAccountInfoDto)
+  readonly account_info: ItemAttributeAccountInfoDto;
 }
 
 class ItemDto {
@@ -59,10 +71,8 @@ class ItemDto {
   @IsInt()
   readonly inventory: number;
 
-  @ValidateIf((o) => o.id !== undefined)
   @IsOptional()
-  @IsInt()
-  readonly quantity: number;
+  readonly quantity: number | string;
 
   @ValidateIf((o) => o.id !== undefined)
   @IsDefined()
@@ -117,6 +127,14 @@ export class CreateListingDto {
   @IsDefined()
   @IsBoolean()
   readonly isOffers: boolean;
+
+  @IsDefined()
+  @IsBoolean()
+  readonly isBuyout: boolean;
+
+  @IsDefined()
+  @IsString()
+  readonly details: string;
 
   @IsDefined()
   @IsDate()

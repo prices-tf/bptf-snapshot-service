@@ -122,6 +122,8 @@ export class ListingService {
               currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
               isAutomatic: listing.isAutomatic,
               isOffers: listing.isOffers,
+              isBuyout: listing.isBuyout,
+              details: listing.details,
               createdAt: listing.createdAt,
               bumpedAt: listing.bumpedAt,
               snapshot,
@@ -140,3 +142,22 @@ export class ListingService {
     return snapshot;
   }
 }
+
+/*
+return listings.map((listing) => ({
+  id: listing.id,
+  steamid64: listing.steamid,
+  item: listing.item,
+  intent: listing.intent,
+  currencies: {
+    keys: listing.currencies.keys ?? 0,
+    metal: listing.currencies.metal ?? 0,
+  },
+  isAutomatic: listing.automatic === 1,
+  isBuyout: listing.buyout === 1,
+  isOffers: listing.offers === 1,
+  details: listing.details,
+  createdAt: new Date(listing.created * 1000),
+  bumpedAt: new Date(listing.bump * 1000),
+}));
+*/

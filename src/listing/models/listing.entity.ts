@@ -28,7 +28,13 @@ export class Listing {
   readonly isAutomatic: boolean;
 
   @Column()
+  readonly isBuyout: boolean;
+
+  @Column()
   readonly isOffers: boolean;
+
+  @Column()
+  private details: string;
 
   @Column({
     type: 'float',
