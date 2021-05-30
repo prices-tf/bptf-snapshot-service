@@ -40,6 +40,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Docker meta
+        id: meta
+        uses: crazy-max/ghaction-docker-meta@v2
+        with:
+          images: |
+            ghcr.io/nicklason/bptf-listing-service
+          tags: |
+            type=semver,pattern={{version}},value=v${{ needs.release.outputs.new_release_version }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
@@ -64,8 +72,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           push: true
-          tags: |
-            ghcr.io/nicklason/bptf-listing-service:latest
-            ghcr.io/nicklason/bptf-listing-service:${{ needs.release.outputs.new_release_version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
