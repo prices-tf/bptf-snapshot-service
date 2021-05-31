@@ -14,7 +14,7 @@ import { Config, RabbitMQConfig } from '../common/config/configuration';
         return {
           exchanges: [
             {
-              name: 'snapshot.created',
+              name: 'bptf-listing.created',
               type: 'fanout',
             },
           ],

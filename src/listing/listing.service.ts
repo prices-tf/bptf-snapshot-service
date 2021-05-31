@@ -137,7 +137,7 @@ export class ListingService {
       },
     );
 
-    await this.amqpConnection.publish('snapshot.created', '*', snapshot);
+    await this.amqpConnection.publish('bptf-listing.created', '*', snapshot);
 
     return snapshot;
   }
