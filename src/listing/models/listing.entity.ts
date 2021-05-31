@@ -1,4 +1,4 @@
-import { ListingIntent } from '../../listing/enums/listing-intent.enum';
+import { ListingIntent } from '../enums/listing-intent.enum';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Snapshot } from './snapshot.entity';
 
