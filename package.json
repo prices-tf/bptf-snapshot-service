@@ -50,7 +50,7 @@
     "@nestjs/testing": "^7.6.18",
     "@semantic-release/commit-analyzer": "^8.0.1",
     "@semantic-release/github": "^7.2.3",
-    "@semantic-release/release-notes-generator": "^9.0.1",
+    "@semantic-release/release-notes-generator": "^9.0.3",
     "@types/bull": "^3.15.1",
     "@types/express": "^4.17.8",
     "@types/ioredis": "^4.26.3",
