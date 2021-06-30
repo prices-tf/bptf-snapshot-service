@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Snapshot } from './models/snapshot.entity';
-import { getConnection, In, Repository } from 'typeorm';
+import { getConnection, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
 import { Listing } from './models/listing.entity';
@@ -17,9 +17,11 @@ import {
 export class ListingService {
   constructor(
     @InjectRepository(Snapshot)
-    private snapshotRepository: Repository<Snapshot>,
+    private readonly snapshotRepository: Repository<Snapshot>,
+    @InjectRepository(Listing)
+    private readonly listingRepository: Repository<Listing>,
     @InjectQueue('snapshot')
-    private snapshotQueue: Queue<{
+    private readonly snapshotQueue: Queue<{
       sku: string;
     }>,
     private readonly amqpConnection: AmqpConnection,
@@ -75,70 +77,45 @@ export class ListingService {
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
-    // const snapshot = this.snapshotRepository.create(createSnapshot);
-
-    const snapshot = await getConnection().transaction(
-      async (transactionalEntityManager) => {
-        const currentSnapshots = await transactionalEntityManager.find(
-          Snapshot,
-          {
-            where: {
-              sku: createSnapshot.sku,
-            },
-          },
-        );
-
-        if (currentSnapshots.length !== 0) {
-          // Remove old listings
-          await transactionalEntityManager
-            .createQueryBuilder()
-            .delete()
-            .from(Listing)
-            .where({
-              snapshot: In(currentSnapshots.map((snapshot) => snapshot.id)),
-            })
-            .execute();
-
-          // Remove old snapshots
-          await transactionalEntityManager.remove(currentSnapshots);
-        }
-
-        const snapshot = transactionalEntityManager.create(Snapshot, {
+    await getConnection().transaction(async (transactionalEntityManager) => {
+      const currentSnapshots = await transactionalEntityManager.find(Snapshot, {
+        where: {
           sku: createSnapshot.sku,
-          createdAt: createSnapshot.createdAt,
-        });
+        },
+        lock: {
+          mode: 'pessimistic_read',
+        },
+      });
 
-        await transactionalEntityManager.insert(Snapshot, snapshot);
+      if (currentSnapshots.length !== 0) {
+        // Remove old snapshots
+        await transactionalEntityManager.remove(currentSnapshots);
+      }
+    });
 
-        const listings = createSnapshot.listings.map((listing) => {
-          return transactionalEntityManager.create(Listing, {
-            id: listing.id,
-            steamid64: listing.steamid64,
-            item: listing.item,
-            intent: listing.intent,
-            currenciesKeys: listing.currencies.keys,
-            currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
-            isAutomatic: listing.isAutomatic,
-            isOffers: listing.isOffers,
-            isBuyout: listing.isBuyout,
-            details: listing.details,
-            createdAt: listing.createdAt,
-            bumpedAt: listing.bumpedAt,
-            snapshot,
-          });
-        });
+    const listings = createSnapshot.listings.map((listing) => {
+      return this.listingRepository.create({
+        id: listing.id,
+        steamid64: listing.steamid64,
+        item: listing.item,
+        intent: listing.intent,
+        currenciesKeys: listing.currencies.keys,
+        currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
+        isAutomatic: listing.isAutomatic,
+        isOffers: listing.isOffers,
+        isBuyout: listing.isBuyout,
+        details: listing.details,
+        createdAt: listing.createdAt,
+        bumpedAt: listing.bumpedAt,
+      });
+    });
 
-        await transactionalEntityManager
-          .createQueryBuilder()
-          .insert()
-          .into(Listing)
-          .values(listings)
-          .execute();
-
-        snapshot.listings = listings;
-
-        return snapshot;
-      },
+    const snapshot = await this.snapshotRepository.save(
+      this.snapshotRepository.create({
+        sku: createSnapshot.sku,
+        createdAt: createSnapshot.createdAt,
+        listings,
+      }),
     );
 
     await this.amqpConnection.publish('bptf-listing.created', '*', snapshot);

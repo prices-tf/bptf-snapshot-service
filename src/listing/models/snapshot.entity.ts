@@ -2,7 +2,8 @@ import {
   Column,
   Entity,
   Index,
-  OneToMany,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Listing } from './listing.entity';
@@ -18,9 +19,10 @@ export class Snapshot {
   })
   readonly sku: string;
 
-  @OneToMany(() => Listing, (listing) => listing.snapshot, {
-    onDelete: 'CASCADE',
+  @ManyToMany(() => Listing, {
+    cascade: true,
   })
+  @JoinTable()
   listings: Listing[];
 
   @Column()

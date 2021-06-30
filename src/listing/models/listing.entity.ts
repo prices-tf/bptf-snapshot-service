@@ -1,14 +1,10 @@
 import { ListingIntent } from '../enums/listing-intent.enum';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { Snapshot } from './snapshot.entity';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Listing {
   @PrimaryColumn()
   readonly id: string;
-
-  @ManyToOne(() => Snapshot)
-  snapshot: Snapshot;
 
   @Column()
   readonly steamid64: string;
