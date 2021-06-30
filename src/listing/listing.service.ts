@@ -103,33 +103,37 @@ export class ListingService {
           await transactionalEntityManager.remove(currentSnapshots);
         }
 
-        const snapshot = await transactionalEntityManager.save(
-          transactionalEntityManager.create(Snapshot, {
-            sku: createSnapshot.sku,
-            createdAt: createSnapshot.createdAt,
-          }),
-        );
+        const snapshot = transactionalEntityManager.create(Snapshot, {
+          sku: createSnapshot.sku,
+          createdAt: createSnapshot.createdAt,
+        });
 
-        const listings = await transactionalEntityManager.save(
-          transactionalEntityManager.create(
-            Listing,
-            createSnapshot.listings.map((listing) => ({
-              id: listing.id,
-              steamid64: listing.steamid64,
-              item: listing.item,
-              intent: listing.intent,
-              currenciesKeys: listing.currencies.keys,
-              currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
-              isAutomatic: listing.isAutomatic,
-              isOffers: listing.isOffers,
-              isBuyout: listing.isBuyout,
-              details: listing.details,
-              createdAt: listing.createdAt,
-              bumpedAt: listing.bumpedAt,
-              snapshot,
-            })),
-          ),
-        );
+        await transactionalEntityManager.insert(Snapshot, snapshot);
+
+        const listings = createSnapshot.listings.map((listing) => {
+          return transactionalEntityManager.create(Listing, {
+            id: listing.id,
+            steamid64: listing.steamid64,
+            item: listing.item,
+            intent: listing.intent,
+            currenciesKeys: listing.currencies.keys,
+            currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
+            isAutomatic: listing.isAutomatic,
+            isOffers: listing.isOffers,
+            isBuyout: listing.isBuyout,
+            details: listing.details,
+            createdAt: listing.createdAt,
+            bumpedAt: listing.bumpedAt,
+            snapshot,
+          });
+        });
+
+        await transactionalEntityManager
+          .createQueryBuilder()
+          .insert()
+          .into(Listing)
+          .values(listings)
+          .execute();
 
         snapshot.listings = listings;
 
