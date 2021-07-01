@@ -30,7 +30,7 @@
     "@nestjs/terminus": "^7.1.2",
     "@nestjs/typeorm": "^7.1.5",
     "body-parser": "^1.19.0",
-    "bull": "^3.22.9",
+    "bull": "^3.22.10",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "joi": "^17.4.0",
