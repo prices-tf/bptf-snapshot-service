@@ -1,6 +1,6 @@
 {
-  "name": "bptf-listing-service",
-  "description": "Service responsible for saving listings of items from backpack.tf",
+  "name": "bptf-snapshot-service",
+  "description": "Service responsible for saving snapshots of items from backpack.tf",
   "author": "Nicklas Marc Pedersen",
   "private": true,
   "license": "MIT",

@@ -45,7 +45,7 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: |
-            ghcr.io/nicklason/bptf-listing-service
+            ghcr.io/nicklason/bptf-snapshot-service
           tags: |
             type=semver,pattern={{version}},value=v${{ needs.release.outputs.new_release_version }}
       - name: Set up QEMU
