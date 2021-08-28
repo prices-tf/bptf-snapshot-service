@@ -18,7 +18,7 @@ import { Config, RabbitMQConfig } from '../common/config/configuration';
               type: 'fanout',
             },
           ],
-          uri: `amqp://${rabbitmqConfig.username}:${rabbitmqConfig.password}@${rabbitmqConfig.host}:${rabbitmqConfig.port}`,
+          uri: `amqp://${rabbitmqConfig.username}:${rabbitmqConfig.password}@${rabbitmqConfig.host}:${rabbitmqConfig.port}/${rabbitmqConfig.vhost}`,
         };
       },
     }),

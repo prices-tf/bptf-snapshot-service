@@ -26,6 +26,7 @@ export interface RabbitMQConfig {
   port: number;
   username: string;
   password: string;
+  vhost: string;
 }
 
 export default (): Config => {
@@ -53,6 +54,7 @@ export default (): Config => {
       port: parseInt(process.env.RABBITMQ_PORT, 10),
       username: process.env.RABBITMQ_USERNAME,
       password: process.env.RABBITMQ_PASSWORD,
+      vhost: process.env.RABBITMQ_VHOST,
     },
   };
 };
