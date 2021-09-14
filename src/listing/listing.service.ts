@@ -95,7 +95,6 @@ export class ListingService {
 
     const listings = createSnapshot.listings.map((listing) => {
       return this.listingRepository.create({
-        id: listing.id,
         steamid64: listing.steamid64,
         item: listing.item,
         intent: listing.intent,

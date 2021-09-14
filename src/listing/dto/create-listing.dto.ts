@@ -48,10 +48,6 @@ class ItemDto {
   @IsInt()
   readonly quality: number;
 
-  @IsDefined()
-  @IsString()
-  readonly name: string;
-
   @IsOptional()
   @IsInt()
   readonly id: number;
@@ -98,10 +94,6 @@ export class CurrenciesDto {
 }
 
 export class CreateListingDto {
-  @IsDefined()
-  @IsString()
-  readonly id: string;
-
   @IsDefined()
   @IsSteamID64()
   readonly steamid64: string;

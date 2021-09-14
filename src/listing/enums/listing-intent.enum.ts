@@ -1,4 +1,4 @@
 export enum ListingIntent {
-  BUY = 0,
-  SELL = 1,
+  BUY = 'buy',
+  SELL = 'sell',
 }
