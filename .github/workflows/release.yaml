@@ -45,7 +45,7 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: |
-            ghcr.io/nicklason/bptf-snapshot-service
+            ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}},value=v${{ needs.release.outputs.new_release_version }}
       - name: Set up QEMU
@@ -70,7 +70,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
