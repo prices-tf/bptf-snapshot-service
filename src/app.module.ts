@@ -72,10 +72,6 @@ import { RabbitMQWrapperModule } from './rabbitmq-wrapper/rabbitmq-wrapper.modul
         return {
           redis: redisConfig,
           prefix: 'bull',
-          limiter: {
-            max: 1,
-            duration: 1000,
-          },
         };
       },
     }),
