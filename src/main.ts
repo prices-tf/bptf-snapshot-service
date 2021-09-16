@@ -7,9 +7,7 @@ import * as bodyParser from 'body-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  const configService: ConfigService<Config> = app.get<ConfigService>(
-    'ConfigService',
-  );
+  const configService: ConfigService<Config> = app.get(ConfigService);
 
   app.enableShutdownHooks();
 
