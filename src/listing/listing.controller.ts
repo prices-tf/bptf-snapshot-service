@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -14,8 +15,6 @@ import { Snapshot } from '../listing/models/snapshot.entity';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
 import { RefreshSnapshotQueryDto } from './dto/refresh-snapshot-query.dto';
 import { ListingService } from './listing.service';
-
-// TODO: Validate sku?
 
 @Controller('listings')
 export class ListingController {
@@ -44,6 +43,10 @@ export class ListingController {
   ): Promise<{
     enqueued: boolean;
   }> {
+    if (!this.listingService.isValidSKU(sku)) {
+      throw new BadRequestException('Invalid SKU');
+    }
+
     await this.listingService.enqueueSnapshot(sku, query.delay);
 
     return {

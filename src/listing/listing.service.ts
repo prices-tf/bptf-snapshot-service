@@ -12,6 +12,7 @@ import {
   Pagination,
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
+import * as SKU from 'tf2-sku';
 
 @Injectable()
 export class ListingService {
@@ -26,6 +27,11 @@ export class ListingService {
     }>,
     private readonly amqpConnection: AmqpConnection,
   ) {}
+
+  isValidSKU(sku: string): boolean {
+    const item = SKU.fromString(sku);
+    return sku === SKU.fromObject(item);
+  }
 
   async enqueueSnapshot(sku: string, delay?: number): Promise<void> {
     const jobId = sku;
