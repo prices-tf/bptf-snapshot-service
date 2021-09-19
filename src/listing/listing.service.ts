@@ -30,6 +30,11 @@ export class ListingService {
 
   isValidSKU(sku: string): boolean {
     const item = SKU.fromString(sku);
+
+    if (item.craftnumber !== null) {
+      return false;
+    }
+
     return sku === SKU.fromObject(item);
   }
 
