@@ -46,13 +46,24 @@ export class ListingService {
     if (job) {
       const state = await job.getState();
 
-      if (
-        delay !== undefined &&
-        state === 'delayed' &&
-        job.timestamp + job.opts.delay > new Date().getTime() + delay
-      ) {
-        // If job was made again with new delay then it would be processed earlier
-        await job.remove();
+      if (state === 'delayed') {
+        // Job is delayed, figure out if it should be promoted, removed or ignored
+        const now = new Date().getTime();
+        const delayEnd = job.timestamp + job.opts.delay;
+
+        if (delay == undefined) {
+          if (delayEnd > now) {
+            // Job is delayed, promote it to waiting
+            await job.promote();
+            return false;
+          }
+        } else if (delayEnd > now + delay) {
+          // If job was made again with new delay then it would be processed earlier
+          await job.remove();
+        } else {
+          // Job should not be updated
+          return false;
+        }
       } else if (state === 'completed' || state === 'failed') {
         // Job is finished, remove it
         await job.remove();
