@@ -38,16 +38,20 @@ export class ListingService {
     return sku === SKU.fromObject(item);
   }
 
-  async enqueueSnapshot(sku: string, delay?: number): Promise<void> {
+  async enqueueSnapshot(sku: string, delay?: number): Promise<boolean> {
     const jobId = sku;
 
-    const oldJob = await this.snapshotQueue.getJob(jobId);
+    const job = await this.snapshotQueue.getJob(jobId);
 
-    if (oldJob?.finishedOn !== undefined) {
-      try {
-        await oldJob.remove();
-      } catch (error) {
-        // This might error for some reason, so catching it here
+    if (job) {
+      const state = await job.getState();
+
+      if (state === 'completed' || state === 'failed') {
+        // Job is finished, remove it
+        await job.remove();
+      } else {
+        // Job already in the queue
+        return false;
       }
     }
 
@@ -59,7 +63,7 @@ export class ListingService {
         delay: 5000,
       },
       removeOnComplete: true,
-      removeOnFail: 10,
+      removeOnFail: true,
     };
 
     if (delay !== undefined) {
@@ -72,6 +76,10 @@ export class ListingService {
       },
       options,
     );
+
+    // Added job to queue
+
+    return true;
   }
 
   getListingsBySKU(sku: string): Promise<Snapshot> {

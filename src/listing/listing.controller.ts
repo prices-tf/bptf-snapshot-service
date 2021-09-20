@@ -47,10 +47,13 @@ export class ListingController {
       throw new BadRequestException('Invalid SKU');
     }
 
-    await this.listingService.enqueueSnapshot(sku, query.delay);
+    const enqueued = await this.listingService.enqueueSnapshot(
+      sku,
+      query.delay,
+    );
 
     return {
-      enqueued: true,
+      enqueued,
     };
   }
 
