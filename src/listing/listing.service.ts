@@ -46,7 +46,14 @@ export class ListingService {
     if (job) {
       const state = await job.getState();
 
-      if (state === 'completed' || state === 'failed') {
+      if (
+        delay !== undefined &&
+        state === 'delayed' &&
+        job.timestamp + job.opts.delay > new Date().getTime() + delay
+      ) {
+        // If job was made again with new delay then it would be processed earlier
+        await job.remove();
+      } else if (state === 'completed' || state === 'failed') {
         // Job is finished, remove it
         await job.remove();
       } else {
