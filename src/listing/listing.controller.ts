@@ -13,7 +13,7 @@ import {
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Snapshot } from '../listing/models/snapshot.entity';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
-import { RefreshSnapshotQueryDto } from './dto/refresh-snapshot-query.dto';
+import { RefreshSnapshotDto } from './dto/refresh-snapshot.dto';
 import { ListingService } from './listing.service';
 
 @Controller('listings')
@@ -34,12 +34,12 @@ export class ListingController {
   @Post('/:sku/refresh')
   async enqueueSnapshot(
     @Param('sku') sku: string,
-    @Query(
+    @Body(
       new ValidationPipe({
         transform: true,
       }),
     )
-    query: RefreshSnapshotQueryDto,
+    body: RefreshSnapshotDto,
   ): Promise<{
     enqueued: boolean;
   }> {
@@ -47,10 +47,7 @@ export class ListingController {
       throw new BadRequestException('Invalid SKU');
     }
 
-    const enqueued = await this.listingService.enqueueSnapshot(
-      sku,
-      query.delay,
-    );
+    const enqueued = await this.listingService.enqueueSnapshot(sku, body.delay);
 
     return {
       enqueued,
