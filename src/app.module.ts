@@ -14,6 +14,7 @@ import { BullModule } from '@nestjs/bull';
 import IORedis from 'ioredis';
 import { HealthModule } from './health/health.module';
 import { RabbitMQWrapperModule } from './rabbitmq-wrapper/rabbitmq-wrapper.module';
+import { QueueModule } from './queue/queue.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { RabbitMQWrapperModule } from './rabbitmq-wrapper/rabbitmq-wrapper.modul
     RabbitMQWrapperModule,
     HealthModule,
     ListingModule,
+    QueueModule,
   ],
 })
 export class AppModule {}
