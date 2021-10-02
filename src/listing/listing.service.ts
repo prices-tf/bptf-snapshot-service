@@ -38,7 +38,11 @@ export class ListingService {
     return sku === SKU.fromObject(item);
   }
 
-  async enqueueSnapshot(sku: string, delay?: number): Promise<boolean> {
+  async enqueueSnapshot(
+    sku: string,
+    delay?: number,
+    replace = true,
+  ): Promise<boolean> {
     const jobId = sku;
 
     const job = await this.snapshotQueue.getJob(jobId);
@@ -46,7 +50,7 @@ export class ListingService {
     if (job) {
       const state = await job.getState();
 
-      if (state === 'delayed') {
+      if (replace === true && state === 'delayed') {
         // Job is delayed, figure out if it should be promoted, removed or ignored
         const now = new Date().getTime();
         const delayEnd = job.timestamp + job.opts.delay;
