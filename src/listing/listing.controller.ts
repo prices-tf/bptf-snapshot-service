@@ -50,6 +50,7 @@ export class ListingController {
     const enqueued = await this.listingService.enqueueSnapshot(
       sku,
       body.delay,
+      body.priority,
       body.replace,
     );
 

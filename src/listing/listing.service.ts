@@ -41,6 +41,7 @@ export class ListingService {
   async enqueueSnapshot(
     sku: string,
     delay?: number,
+    priority?: number,
     replace = true,
   ): Promise<boolean> {
     const jobId = sku;
@@ -50,7 +51,14 @@ export class ListingService {
     if (job) {
       const state = await job.getState();
 
-      if (replace === true && state === 'delayed') {
+      if (
+        replace === true &&
+        state !== 'active' &&
+        job.opts.priority !== priority
+      ) {
+        // Job has a different priority, replace it with new job
+        await job.remove();
+      } else if (replace === true && state === 'delayed') {
         // Job is delayed, figure out if it should be promoted, removed or ignored
         const now = new Date().getTime();
         const delayEnd = job.timestamp + job.opts.delay;
@@ -90,6 +98,10 @@ export class ListingService {
 
     if (delay !== undefined) {
       options.delay = delay;
+    }
+
+    if (priority !== undefined) {
+      options.priority = priority;
     }
 
     await this.snapshotQueue.add(

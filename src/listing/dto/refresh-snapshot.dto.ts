@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, IsPositive } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsPositive, Max } from 'class-validator';
 
 export class RefreshSnapshotDto {
   @IsOptional()
@@ -11,4 +11,10 @@ export class RefreshSnapshotDto {
   @IsOptional()
   @IsBoolean()
   replace?: boolean;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  @Max(Number.MAX_SAFE_INTEGER)
+  priority?: number;
 }
