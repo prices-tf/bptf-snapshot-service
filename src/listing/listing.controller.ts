@@ -5,7 +5,6 @@ import {
   Get,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   Query,
   ValidationPipe,
@@ -13,6 +12,7 @@ import {
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { Snapshot } from '../listing/models/snapshot.entity';
 import { CreateSnapshotDto } from './dto/create-snapshot.dto';
+import { GetSnapshotsDto } from './dto/get-snapshots.dto';
 import { RefreshSnapshotDto } from './dto/refresh-snapshot.dto';
 import { ListingService } from './listing.service';
 
@@ -22,13 +22,20 @@ export class ListingController {
 
   @Get()
   getAllSnapshots(
-    @Query('page', new ParseIntPipe()) page = 1,
-    @Query('limit', new ParseIntPipe()) limit = 10,
+    @Query(
+      new ValidationPipe({
+        transform: true,
+      }),
+    )
+    query: GetSnapshotsDto,
   ): Promise<Pagination<Snapshot>> {
-    return this.listingService.getSnapshots({
-      page,
-      limit,
-    });
+    return this.listingService.paginate(
+      {
+        page: query.page ?? 1,
+        limit: query.limit ?? 100,
+      },
+      query.order,
+    );
   }
 
   @Post('/:sku/refresh')

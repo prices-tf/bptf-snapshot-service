@@ -125,8 +125,15 @@ export class ListingService {
     });
   }
 
-  getSnapshots(options: IPaginationOptions): Promise<Pagination<Snapshot>> {
-    return paginate<Snapshot>(this.snapshotRepository, options);
+  paginate(
+    options: IPaginationOptions,
+    order: 'ASC' | 'DESC',
+  ): Promise<Pagination<Snapshot>> {
+    return paginate<Snapshot>(this.snapshotRepository, options, {
+      order: {
+        createdAt: order,
+      },
+    });
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
