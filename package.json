@@ -68,13 +68,13 @@
     "eslint-plugin-prettier": "^3.4.0",
     "husky": "^7.0.2",
     "jest": "^27.0.5",
-    "prettier": "^2.3.1",
+    "prettier": "^2.4.1",
     "semantic-release": "^17.4.7",
     "supertest": "^6.0.0",
     "ts-jest": "^27.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.2.0",
-    "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths": "^3.11.0",
     "typescript": "^4.3.4"
   },
   "config": {
