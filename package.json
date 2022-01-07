@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json --maxWorkers=1"
   },
   "dependencies": {
-    "@golevelup/nestjs-rabbitmq": "^1.17.0",
+    "@golevelup/nestjs-rabbitmq": "^1.19.0",
     "@nestjs/bull": "^0.3.1",
     "@nestjs/common": "^7.5.1",
     "@nestjs/config": "^0.6.3",
@@ -74,7 +74,7 @@
     "ts-jest": "^27.0.5",
     "ts-loader": "^9.2.3",
     "ts-node": "^10.2.0",
-    "tsconfig-paths": "^3.9.0",
+    "tsconfig-paths": "^3.12.0",
     "typescript": "^4.3.4"
   },
   "config": {
