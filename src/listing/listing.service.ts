@@ -201,13 +201,15 @@ export class ListingService {
   }
 
   private createSKUFromItem(item: ItemDto): string {
-    const killstreak = item.attributes.find((v) => v.defindex == 2025);
-    const effect = item.attributes.find((v) => v.defindex == 134);
-    const wear = item.attributes.find((v) => v.defindex == 725);
-    const paintkit = item.attributes.find((v) => v.defindex == 834);
-    const createSeries = item.attributes.find((v) => v.defindex == 187);
-    const output = item.attributes.find((v) => v.is_output === true);
-    const festivized = item.attributes.find((v) => v.defindex == 2053);
+    const itemAttributes = item.attributes ?? [];
+
+    const killstreak = itemAttributes.find((v) => v.defindex == 2025);
+    const effect = itemAttributes.find((v) => v.defindex == 134);
+    const wear = itemAttributes.find((v) => v.defindex == 725);
+    const paintkit = itemAttributes.find((v) => v.defindex == 834);
+    const createSeries = itemAttributes.find((v) => v.defindex == 187);
+    const output = itemAttributes.find((v) => v.is_output === true);
+    const festivized = itemAttributes.find((v) => v.defindex == 2053);
 
     const object = {
       defindex: item.defindex,
@@ -217,7 +219,7 @@ export class ListingService {
         killstreak === undefined
           ? 0
           : parseInt(killstreak.float_value.toString(), 10),
-      australium: item.attributes.findIndex((v) => v.defindex == 2027) !== -1,
+      australium: itemAttributes.findIndex((v) => v.defindex == 2027) !== -1,
       festive: festivized === undefined ? false : festivized.float_value == 1,
       effect:
         effect === undefined
@@ -230,7 +232,7 @@ export class ListingService {
           ? null
           : Math.floor(parseFloat(wear.float_value.toString()) * 10) / 2,
       quality2:
-        item.attributes.findIndex((v) => v.defindex == 388) !== -1 ? 11 : null,
+        itemAttributes.findIndex((v) => v.defindex == 388) !== -1 ? 11 : null,
       target: null,
       crateseries:
         createSeries === undefined
@@ -250,7 +252,7 @@ export class ListingService {
         target = output.attributes.find((v) => v.defindex == 2012);
       }
     } else {
-      target = item.attributes.find((v) => v.defindex == 2012);
+      target = itemAttributes.find((v) => v.defindex == 2012);
     }
 
     if (target !== undefined) {
