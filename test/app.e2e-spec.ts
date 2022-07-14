@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module';
-import { Connection } from 'typeorm';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { DataSource } from 'typeorm';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
+  let dataSource: DataSource;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -15,21 +17,14 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication();
     await app.init();
 
-    const connection = app.get(Connection);
-
-    // Delete all data
-    await connection.dropDatabase();
-    // Syncronize the database
-    await connection.synchronize();
+    dataSource = app.get(DataSource);
+    await dataSource.synchronize(true);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    const amqpConnection = app.get(AmqpConnection);
+    await amqpConnection.managedConnection.close();
     return app.close();
-  });
-
-  afterAll(() => {
-    const connection = app.get(Connection);
-    return connection.close();
   });
 
   describe('GET /listings', () => {
