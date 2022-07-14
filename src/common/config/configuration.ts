@@ -1,7 +1,7 @@
 export interface Config {
   port: number;
   database: DatabaseConfig;
-  queue: QueueConfig;
+  redis: RedisConfig;
   rabbitmq: RabbitMQConfig;
 }
 
@@ -13,7 +13,7 @@ export interface DatabaseConfig {
   database: string;
 }
 
-export interface QueueConfig {
+export interface RedisConfig {
   isSentinel: boolean;
   host: string;
   port: number;
@@ -42,12 +42,12 @@ export default (): Config => {
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DATABASE,
     },
-    queue: {
-      isSentinel: process.env.QUEUE_IS_SENTINEL === 'true',
-      host: process.env.QUEUE_HOST,
-      port: parseInt(process.env.QUEUE_PORT, 10),
-      password: process.env.QUEUE_PASSWORD,
-      set: process.env.QUEUE_SET,
+    redis: {
+      isSentinel: process.env.REDIS_IS_SENTINEL === 'true',
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT, 10),
+      password: process.env.REDIS_PASSWORD,
+      set: process.env.REDIS_SET,
     },
     rabbitmq: {
       host: process.env.RABBITMQ_HOST,

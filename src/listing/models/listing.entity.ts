@@ -1,10 +1,14 @@
 import { ListingIntent } from '../enums/listing-intent.enum';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Snapshot } from './snapshot.entity';
 
 @Entity()
 export class Listing {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   readonly id: string;
+
+  @Column()
+  readonly sku: string;
 
   @Column()
   readonly steamid64: string;
@@ -29,7 +33,9 @@ export class Listing {
   @Column()
   readonly isOffers: boolean;
 
-  @Column()
+  @Column({
+    nullable: true,
+  })
   readonly details: string;
 
   @Column({
@@ -47,4 +53,7 @@ export class Listing {
 
   @Column()
   readonly bumpedAt: Date;
+
+  @ManyToOne(() => Snapshot, (snapshot) => snapshot.listings)
+  snapshot: Snapshot;
 }

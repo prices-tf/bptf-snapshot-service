@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Snapshot } from './models/snapshot.entity';
-import { getConnection, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateSnapshotDto } from './dto/create-snapshot.dto';
+import { DataSource } from 'typeorm';
+import {
+  CreateSnapshotDto,
+  ItemAttributeDto,
+  ItemDto,
+} from './dto/create-snapshot.dto';
 import { Listing } from './models/listing.entity';
 import { InjectQueue } from '@nestjs/bull';
 import Bull, { Queue } from 'bull';
@@ -13,19 +16,18 @@ import {
   IPaginationOptions,
 } from 'nestjs-typeorm-paginate';
 import * as SKU from 'tf2-sku';
+import { ListingIntent } from './enums/listing-intent.enum';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class ListingService {
   constructor(
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
-    @InjectRepository(Listing)
-    private readonly listingRepository: Repository<Listing>,
     @InjectQueue('snapshot')
-    private readonly snapshotQueue: Queue<{
+    private readonly queue: Queue<{
       sku: string;
     }>,
     private readonly amqpConnection: AmqpConnection,
+    private readonly dataSource: DataSource,
   ) {}
 
   isValidSKU(sku: string): boolean {
@@ -46,7 +48,7 @@ export class ListingService {
   ): Promise<boolean> {
     const jobId = sku;
 
-    const job = await this.snapshotQueue.getJob(jobId);
+    const job = await this.queue.getJob(jobId);
 
     if (job) {
       const state = await job.getState();
@@ -104,7 +106,7 @@ export class ListingService {
       options.priority = priority;
     }
 
-    await this.snapshotQueue.add(
+    await this.queue.add(
       {
         sku,
       },
@@ -117,9 +119,9 @@ export class ListingService {
   }
 
   getListingsBySKU(sku: string): Promise<Snapshot> {
-    return this.snapshotRepository.findOne({
+    return this.dataSource.createEntityManager().findOne(Snapshot, {
       where: {
-        sku: sku,
+        sku,
       },
       relations: ['listings'],
     });
@@ -129,56 +131,140 @@ export class ListingService {
     options: IPaginationOptions,
     order: 'ASC' | 'DESC',
   ): Promise<Pagination<Snapshot>> {
-    return paginate<Snapshot>(this.snapshotRepository, options, {
-      order: {
-        createdAt: order,
+    return paginate<Snapshot>(
+      this.dataSource.getRepository(Snapshot),
+      options,
+      {
+        order: {
+          createdAt: order,
+        },
       },
-    });
+    );
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
-    await getConnection().transaction(async (transactionalEntityManager) => {
-      const currentSnapshots = await transactionalEntityManager.find(Snapshot, {
-        where: {
-          sku: createSnapshot.sku,
-        },
-        lock: {
-          mode: 'pessimistic_read',
-        },
-      });
-
-      if (currentSnapshots.length !== 0) {
-        // Remove old snapshots
-        await transactionalEntityManager.remove(currentSnapshots);
-      }
-    });
-
     const listings = createSnapshot.listings.map((listing) => {
-      return this.listingRepository.create({
-        steamid64: listing.steamid64,
+      let id = '440_';
+
+      if (listing.intent === ListingIntent.BUY) {
+        id +=
+          listing.steamid +
+          '_' +
+          createHash('md5').update(createSnapshot.name).digest('hex');
+      } else {
+        id += listing.item.id;
+      }
+
+      const sku = this.createSKUFromItem(listing.item);
+
+      return this.dataSource.getRepository(Listing).create({
+        id,
+        sku,
+        steamid64: listing.steamid,
         item: listing.item,
         intent: listing.intent,
-        currenciesKeys: listing.currencies.keys,
-        currenciesHalfScrap: Math.round(listing.currencies.metal * 9 * 2),
-        isAutomatic: listing.isAutomatic,
-        isOffers: listing.isOffers,
-        isBuyout: listing.isBuyout,
-        details: listing.details,
-        createdAt: listing.createdAt,
-        bumpedAt: listing.bumpedAt,
+        currenciesKeys: listing.currencies.keys ?? 0,
+        currenciesHalfScrap:
+          listing.currencies.metal === undefined
+            ? 0
+            : Math.round(listing.currencies.metal * 9 * 2),
+        isAutomatic: listing.userAgent !== undefined,
+        isOffers: listing.offers === 1,
+        isBuyout: listing.buyout === 1,
+        details: listing.details === '' ? null : listing.details,
+        createdAt: new Date(listing.timestamp * 1000),
+        bumpedAt: new Date(listing.bump * 1000),
       });
     });
 
-    const snapshot = await this.snapshotRepository.save(
-      this.snapshotRepository.create({
-        sku: createSnapshot.sku,
-        createdAt: createSnapshot.createdAt,
-        listings,
-      }),
+    const snapshot = await this.dataSource.transaction(
+      async (entityManager) => {
+        await entityManager.save(Listing, listings);
+
+        const snapshot = await entityManager.save(
+          Snapshot,
+          entityManager.create(Snapshot, {
+            sku: createSnapshot.sku,
+            name: createSnapshot.name,
+            createdAt: new Date(createSnapshot.createdAt * 1000),
+            listings,
+          }),
+        );
+
+        return snapshot;
+      },
     );
 
     await this.amqpConnection.publish('bptf-snapshot.created', '*', snapshot);
 
     return snapshot;
+  }
+
+  private createSKUFromItem(item: ItemDto): string {
+    const killstreak = item.attributes.find((v) => v.defindex == 2025);
+    const effect = item.attributes.find((v) => v.defindex == 134);
+    const wear = item.attributes.find((v) => v.defindex == 725);
+    const paintkit = item.attributes.find((v) => v.defindex == 834);
+    const createSeries = item.attributes.find((v) => v.defindex == 187);
+    const output = item.attributes.find((v) => v.is_output === true);
+    const festivized = item.attributes.find((v) => v.defindex == 2053);
+
+    const object = {
+      defindex: item.defindex,
+      quality: item.quality,
+      craftable: item.flag_cannot_craft !== true,
+      killstreak:
+        killstreak === undefined
+          ? 0
+          : parseInt(killstreak.float_value.toString(), 10),
+      australium: item.attributes.findIndex((v) => v.defindex == 2027) !== -1,
+      festive: festivized === undefined ? false : festivized.float_value == 1,
+      effect:
+        effect === undefined
+          ? null
+          : parseInt(effect.float_value.toString(), 10),
+      paintkit:
+        paintkit === undefined ? null : parseInt(paintkit.value.toString(), 10),
+      wear:
+        wear === undefined
+          ? null
+          : Math.floor(parseFloat(wear.float_value.toString()) * 10) / 2,
+      quality2:
+        item.attributes.findIndex((v) => v.defindex == 388) !== -1 ? 11 : null,
+      target: null,
+      crateseries:
+        createSeries === undefined
+          ? null
+          : parseInt(createSeries.float_value.toString(), 10),
+      output: null,
+      outputQuality: null,
+    };
+
+    let target: ItemAttributeDto = undefined;
+
+    if (output) {
+      object.output = output.itemdef;
+      object.outputQuality = output.quality;
+
+      if (output.attributes) {
+        target = output.attributes.find((v) => v.defindex == 2012);
+      }
+    } else {
+      target = item.attributes.find((v) => v.defindex == 2012);
+    }
+
+    if (target !== undefined) {
+      object.target = parseInt(target.float_value.toString(), 10);
+    }
+
+    if (item.defindex === 20003) {
+      object.killstreak = 3;
+    } else if (item.defindex === 20002) {
+      object.killstreak = 2;
+    } else if (item.defindex === 20001) {
+      object.killstreak = 1;
+    }
+
+    return SKU.fromObject(object);
   }
 }

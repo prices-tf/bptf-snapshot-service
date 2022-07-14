@@ -80,13 +80,7 @@ export class ListingController {
   @Post()
   async saveListings(
     @Body(new ValidationPipe()) createSnapshot: CreateSnapshotDto,
-  ): Promise<{
-    id: string;
-  }> {
-    const snapshot = await this.listingService.saveSnapshot(createSnapshot);
-
-    return {
-      id: snapshot.id,
-    };
+  ): Promise<void> {
+    await this.listingService.saveSnapshot(createSnapshot);
   }
 }

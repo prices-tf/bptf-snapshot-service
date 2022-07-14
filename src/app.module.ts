@@ -4,14 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration, {
   Config,
   DatabaseConfig,
-  QueueConfig,
+  RedisConfig,
 } from './common/config/configuration';
 import { validation } from './common/config/validation';
 import { Listing } from './listing/models/listing.entity';
 import { Snapshot } from './listing/models/snapshot.entity';
 import { ListingModule } from './listing/listing.module';
 import { BullModule } from '@nestjs/bull';
-import IORedis from 'ioredis';
+import { RedisOptions } from 'ioredis';
 import { HealthModule } from './health/health.module';
 import { RabbitMQWrapperModule } from './rabbitmq-wrapper/rabbitmq-wrapper.module';
 import { QueueModule } from './queue/queue.module';
@@ -40,7 +40,6 @@ import { QueueModule } from './queue/queue.module';
           entities: [Snapshot, Listing],
           autoLoadModels: true,
           synchronize: process.env.TYPEORM_SYNCRONIZE === 'true',
-          keepConnectionAlive: true,
         };
       },
     }),
@@ -48,30 +47,30 @@ import { QueueModule } from './queue/queue.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService<Config>) => {
-        const queueConfig = configService.get<QueueConfig>('queue');
+        const redisConfig = configService.get<RedisConfig>('redis');
 
-        let redisConfig: IORedis.RedisOptions;
+        let redisOptions: RedisOptions;
 
-        if (queueConfig.isSentinel) {
-          redisConfig = {
+        if (redisConfig.isSentinel) {
+          redisOptions = {
             sentinels: [
               {
-                host: queueConfig.host,
-                port: queueConfig.port,
+                host: redisConfig.host,
+                port: redisConfig.port,
               },
             ],
-            name: queueConfig.set,
+            name: redisConfig.set,
           };
         } else {
-          redisConfig = {
-            host: queueConfig.host,
-            port: queueConfig.port,
-            password: queueConfig.password,
+          redisOptions = {
+            host: redisConfig.host,
+            port: redisConfig.port,
+            password: redisConfig.password,
           };
         }
 
         return {
-          redis: redisConfig,
+          redis: redisOptions,
           prefix: 'bull',
         };
       },

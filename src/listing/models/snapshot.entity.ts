@@ -1,29 +1,18 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Listing } from './listing.entity';
 
 @Entity()
 export class Snapshot {
-  @PrimaryGeneratedColumn('uuid')
-  readonly id: string;
-
-  @Index()
-  @Column({
-    unique: true,
-  })
+  @PrimaryColumn()
   readonly sku: string;
 
-  @ManyToMany(() => Listing, {
-    cascade: true,
+  @Column()
+  readonly name: string;
+
+  @OneToMany(() => Listing, (listing) => listing.snapshot, {
+    onDelete: 'CASCADE',
   })
-  @JoinTable()
-  listings: Listing[];
+  readonly listings: Listing[];
 
   @Column()
   readonly createdAt: Date;
