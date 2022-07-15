@@ -209,7 +209,7 @@ export class ListingService {
     const paintkit = itemAttributes.find((v) => v.defindex == 834);
     const createSeries = itemAttributes.find((v) => v.defindex == 187);
     const output = itemAttributes.find(
-      (v) => v.is_output.toString() === 'true',
+      (v) => v.is_output?.toString() === 'true',
     );
     const festivized = itemAttributes.find((v) => v.defindex == 2053);
 
