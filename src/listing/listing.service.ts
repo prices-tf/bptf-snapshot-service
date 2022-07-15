@@ -261,14 +261,10 @@ export class ListingService {
       object.target = parseInt(target.float_value.toString(), 10);
     }
 
-    // TODO: Fix Collector's Chemistry Set
-
     if (item.defindex === 20003) {
       object.killstreak = 3;
     } else if (item.defindex === 20002) {
       object.killstreak = 2;
-    } else if (item.defindex === 20001) {
-      object.killstreak = 1;
     }
 
     return SKU.fromObject(object);
