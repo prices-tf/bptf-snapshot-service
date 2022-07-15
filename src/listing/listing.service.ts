@@ -220,7 +220,7 @@ export class ListingService {
           ? 0
           : parseInt(killstreak.float_value.toString(), 10),
       australium: itemAttributes.findIndex((v) => v.defindex == 2027) !== -1,
-      festive: festivized === undefined ? false : festivized.float_value == 1,
+      festive: festivized === undefined ? false : festivized.float_value != 0,
       effect:
         effect === undefined
           ? null
@@ -258,6 +258,8 @@ export class ListingService {
     if (target !== undefined) {
       object.target = parseInt(target.float_value.toString(), 10);
     }
+
+    // TODO: Fix Collector's Chemistry Set
 
     if (item.defindex === 20003) {
       object.killstreak = 3;

@@ -28,23 +28,19 @@ class ItemAttributeAccountInfoDto {
 
 export class ItemAttributeDto {
   @IsOptional()
-  @IsNumber()
-  readonly itemdef: number;
+  readonly itemdef: number | string;
 
   @IsOptional()
-  @IsNumber()
-  readonly quality: number;
+  readonly quality: number | string;
 
   @IsDefined()
   readonly defindex: number | string;
 
   @IsOptional()
-  @IsNumber()
-  readonly quantity: number;
+  readonly quantity: number | string;
 
   @IsOptional()
-  @IsBoolean()
-  readonly is_output: boolean;
+  readonly is_output: boolean | string;
 
   @IsOptional()
   readonly value: number | string | null;
