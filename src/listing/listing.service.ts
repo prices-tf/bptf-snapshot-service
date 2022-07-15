@@ -205,6 +205,7 @@ export class ListingService {
 
     const killstreak = itemAttributes.find((v) => v.defindex == 2025);
     const effect = itemAttributes.find((v) => v.defindex == 134);
+    const tauntEffect = itemAttributes.find((v) => v.defindex == 2041);
     const wear = itemAttributes.find((v) => v.defindex == 725);
     const paintkit = itemAttributes.find((v) => v.defindex == 834);
     const createSeries = itemAttributes.find((v) => v.defindex == 187);
@@ -223,10 +224,7 @@ export class ListingService {
           : parseInt(killstreak.float_value.toString(), 10),
       australium: itemAttributes.findIndex((v) => v.defindex == 2027) !== -1,
       festive: festivized === undefined ? false : festivized.float_value != 0,
-      effect:
-        effect === undefined
-          ? null
-          : parseInt(effect.float_value.toString(), 10),
+      effect: null,
       paintkit:
         paintkit === undefined ? null : parseInt(paintkit.value.toString(), 10),
       wear:
@@ -243,6 +241,12 @@ export class ListingService {
       output: null,
       outputQuality: null,
     };
+
+    if (effect !== undefined) {
+      object.effect = parseInt(effect.float_value.toString(), 10);
+    } else if (tauntEffect !== undefined) {
+      object.effect = parseInt(tauntEffect.value.toString(), 10);
+    }
 
     let target: ItemAttributeDto = undefined;
 
