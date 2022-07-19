@@ -219,6 +219,15 @@ export class ListingService {
     );
     const festivized = itemAttributes.find((v) => v.defindex == 2053);
 
+    let wearTier =
+      wear === undefined
+        ? null
+        : Math.floor(parseFloat(wear.float_value.toString()) * 10) / 2;
+
+    if (wearTier <= 0) {
+      wearTier = 1;
+    }
+
     const object = {
       defindex: item.defindex,
       quality: item.quality,
@@ -232,10 +241,7 @@ export class ListingService {
       effect: null,
       paintkit:
         paintkit === undefined ? null : parseInt(paintkit.value.toString(), 10),
-      wear:
-        wear === undefined
-          ? null
-          : Math.floor(parseFloat(wear.float_value.toString()) * 10) / 2,
+      wear: wearTier,
       quality2:
         itemAttributes.findIndex((v) => v.defindex == 388) !== -1 ? 11 : null,
       target: null,
