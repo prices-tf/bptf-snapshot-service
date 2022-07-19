@@ -218,6 +218,8 @@ export class ListingService {
       (v) => v.is_output?.toString() === 'true',
     );
     const festivized = itemAttributes.find((v) => v.defindex == 2053);
+    const hasKillEater =
+      itemAttributes.findIndex((v) => v.defindex == 214) !== -1;
 
     let wearTier =
       wear === undefined
@@ -242,8 +244,7 @@ export class ListingService {
       paintkit:
         paintkit === undefined ? null : parseInt(paintkit.value.toString(), 10),
       wear: wearTier,
-      quality2:
-        itemAttributes.findIndex((v) => v.defindex == 388) !== -1 ? 11 : null,
+      quality2: null,
       target: null,
       crateseries:
         createSeries === undefined
@@ -280,6 +281,10 @@ export class ListingService {
       object.killstreak = 3;
     } else if (item.defindex === 20002) {
       object.killstreak = 2;
+    }
+
+    if (hasKillEater && object.quality !== 11) {
+      object.quality2 = 11;
     }
 
     return SKU.fromObject(object);
