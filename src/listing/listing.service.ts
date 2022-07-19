@@ -238,7 +238,7 @@ export class ListingService {
         ? null
         : Math.floor(parseFloat(wear.float_value.toString()) * 10) / 2;
 
-    if (wearTier <= 0) {
+    if (wearTier !== null && wearTier <= 0) {
       wearTier = 1;
     }
 
