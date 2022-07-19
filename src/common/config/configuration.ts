@@ -3,6 +3,7 @@ export interface Config {
   database: DatabaseConfig;
   redis: RedisConfig;
   rabbitmq: RabbitMQConfig;
+  services: Services;
 }
 
 export interface DatabaseConfig {
@@ -27,6 +28,11 @@ export interface RabbitMQConfig {
   username: string;
   password: string;
   vhost: string;
+}
+
+export interface Services {
+  schema: string;
+  skin: string;
 }
 
 export default (): Config => {
@@ -55,6 +61,10 @@ export default (): Config => {
       username: process.env.RABBITMQ_USERNAME,
       password: process.env.RABBITMQ_PASSWORD,
       vhost: process.env.RABBITMQ_VHOST,
+    },
+    services: {
+      schema: process.env.TF2_SCHEMA_SERVICE_URL,
+      skin: process.env.TF2_SKIN_SERVICE_URL,
     },
   };
 };

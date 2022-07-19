@@ -18,10 +18,15 @@ import {
 import * as SKU from 'tf2-sku';
 import { ListingIntent } from './enums/listing-intent.enum';
 import { createHash } from 'crypto';
+import { SchemaService } from '../schema/schema.service';
+import { SkinService } from '../skin/skin.service';
+import { Item } from './interfaces/item.interface';
 
 @Injectable()
 export class ListingService {
   constructor(
+    private readonly schemaService: SchemaService,
+    private readonly skinService: SkinService,
     @InjectQueue('snapshot')
     private readonly queue: Queue<{
       sku: string;
@@ -272,5 +277,98 @@ export class ListingService {
     }
 
     return SKU.fromObject(object);
+  }
+
+  async createName(sku: string): Promise<string> {
+    const item: Item = SKU.fromString(sku);
+    const schemaItem = await this.schemaService.getItemByDefindex(
+      item.defindex,
+    );
+
+    let name = '';
+
+    if (item.craftable === false) {
+      name += 'Non-Craftable ';
+    }
+
+    if (item.outputQuality && item.outputQuality !== 6) {
+      name =
+        (await this.schemaService.getQualityById(item.outputQuality)).name +
+        ' ';
+    }
+
+    if (item.quality2) {
+      name +=
+        (await this.schemaService.getQualityById(item.quality2)).name + ' ';
+    }
+
+    if (
+      (item.quality !== 6 && item.quality !== 15 && item.quality !== 5) ||
+      (item.quality === 5 && !item.effect) ||
+      schemaItem.item_quality === 5
+    ) {
+      name +=
+        (await this.schemaService.getQualityById(item.quality)).name + ' ';
+    }
+
+    if (item.festive === true) {
+      name += 'Festivized ';
+    }
+
+    if (item.effect) {
+      name += (await this.schemaService.getEffectById(item.effect)).name + ' ';
+    }
+
+    if (item.killstreak && item.killstreak > 0) {
+      name +=
+        ['Killstreak', 'Specialized Killstreak', 'Professional Killstreak'][
+          item.killstreak - 1
+        ] + ' ';
+    }
+
+    if (item.target) {
+      name +=
+        (await this.schemaService.getItemByDefindex(item.target)).item_name +
+        ' ';
+    }
+
+    if (item.output) {
+      name +=
+        (await this.schemaService.getItemByDefindex(item.output)).item_name +
+        ' ';
+    }
+
+    if (item.australium === true) {
+      name += 'Australium ';
+    }
+
+    if (item.paintkit !== null) {
+      name += (await this.skinService.getSkinByid(item.paintkit)).name + ' ';
+    }
+
+    if (name === '' && schemaItem.proper_name == true) {
+      name = 'The ';
+    }
+
+    name += schemaItem.item_name;
+
+    if (item.wear) {
+      name +=
+        ' (' +
+        [
+          'Factory New',
+          'Minimal Wear',
+          'Field-Tested',
+          'Well-Worn',
+          'Battle Scarred',
+        ][item.wear - 1] +
+        ')';
+    }
+
+    if (item.crateseries) {
+      name += ' #' + item.crateseries;
+    }
+
+    return name;
   }
 }

@@ -77,6 +77,14 @@ export class ListingController {
     return snapshot;
   }
 
+  @Get('/:sku/name')
+  async getNameForItem(@Param('sku') sku: string): Promise<{ name: string }> {
+    const name = await this.listingService.createName(sku);
+    return {
+      name,
+    };
+  }
+
   @Post()
   async saveListings(
     @Body(new ValidationPipe()) createSnapshot: CreateSnapshotDto,
