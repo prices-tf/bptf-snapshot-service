@@ -36,6 +36,7 @@
     "class-validator": "^0.13.2",
     "crypt": "^0.0.2",
     "crypto": "^1.0.1",
+    "dataloader": "^2.1.0",
     "joi": "^17.6.0",
     "nestjs-typeorm-paginate": "^4.0.1",
     "pg": "^8.7.3",

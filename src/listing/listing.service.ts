@@ -21,6 +21,7 @@ import { createHash } from 'crypto';
 import { SchemaService } from '../schema/schema.service';
 import { SkinService } from '../skin/skin.service';
 import { Item } from './interfaces/item.interface';
+import * as DataLoader from 'dataloader';
 
 @Injectable()
 export class ListingService {
@@ -148,11 +149,18 @@ export class ListingService {
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
+    const nameLoader = new DataLoader<string, string>(
+      (keys) => this.createName(keys[0]).then((name) => [name]),
+      {
+        batch: false,
+      },
+    );
+
     const listings = await Promise.all(
       createSnapshot.listings.map(async (listing) => {
         const sku = this.createSKUFromItem(listing.item);
 
-        const name = await this.createName(sku);
+        const name = await nameLoader.load(sku);
 
         let id = '440_';
 
