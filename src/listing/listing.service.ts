@@ -148,39 +148,43 @@ export class ListingService {
   }
 
   async saveSnapshot(createSnapshot: CreateSnapshotDto): Promise<Snapshot> {
-    const listings = createSnapshot.listings.map((listing) => {
-      let id = '440_';
+    const listings = await Promise.all(
+      createSnapshot.listings.map(async (listing) => {
+        const sku = this.createSKUFromItem(listing.item);
 
-      if (listing.intent === ListingIntent.BUY) {
-        id +=
-          listing.steamid +
-          '_' +
-          createHash('md5').update(createSnapshot.name).digest('hex');
-      } else {
-        id += listing.item.id;
-      }
+        const name = await this.createName(sku);
 
-      const sku = this.createSKUFromItem(listing.item);
+        let id = '440_';
 
-      return this.dataSource.getRepository(Listing).create({
-        id,
-        sku,
-        steamid64: listing.steamid,
-        item: listing.item,
-        intent: listing.intent,
-        currenciesKeys: listing.currencies.keys ?? 0,
-        currenciesHalfScrap:
-          listing.currencies.metal === undefined
-            ? 0
-            : Math.round(listing.currencies.metal * 9 * 2),
-        isAutomatic: listing.userAgent !== undefined,
-        isOffers: listing.offers === 1,
-        isBuyout: listing.buyout === 1,
-        details: listing.details === '' ? null : listing.details,
-        createdAt: new Date(listing.timestamp * 1000),
-        bumpedAt: new Date(listing.bump * 1000),
-      });
-    });
+        if (listing.intent === ListingIntent.BUY) {
+          id +=
+            listing.steamid +
+            '_' +
+            createHash('md5').update(name).digest('hex');
+        } else {
+          id += listing.item.id;
+        }
+
+        return this.dataSource.getRepository(Listing).create({
+          id,
+          sku,
+          steamid64: listing.steamid,
+          item: listing.item,
+          intent: listing.intent,
+          currenciesKeys: listing.currencies.keys ?? 0,
+          currenciesHalfScrap:
+            listing.currencies.metal === undefined
+              ? 0
+              : Math.round(listing.currencies.metal * 9 * 2),
+          isAutomatic: listing.userAgent !== undefined,
+          isOffers: listing.offers === 1,
+          isBuyout: listing.buyout === 1,
+          details: listing.details === '' ? null : listing.details,
+          createdAt: new Date(listing.timestamp * 1000),
+          bumpedAt: new Date(listing.bump * 1000),
+        });
+      }),
+    );
 
     const snapshot = await this.dataSource.transaction(
       async (entityManager) => {
