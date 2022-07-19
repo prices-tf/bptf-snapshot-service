@@ -10,7 +10,7 @@ export class Snapshot {
   readonly name: string;
 
   @OneToMany(() => Listing, (listing) => listing.snapshot, {
-    onDelete: 'CASCADE',
+    cascade: true,
   })
   readonly listings: Listing[];
 

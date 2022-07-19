@@ -196,6 +196,16 @@ export class ListingService {
 
     const snapshot = await this.dataSource.transaction(
       async (entityManager) => {
+        await entityManager
+          .createQueryBuilder()
+          .delete()
+          .from(Listing)
+          .where('"snapshotSku" = :sku')
+          .setParameter('sku', createSnapshot.sku)
+          .execute();
+
+        await entityManager.delete(Snapshot, { sku: createSnapshot.sku });
+
         await entityManager.save(Listing, listings);
 
         const snapshot = await entityManager.save(
