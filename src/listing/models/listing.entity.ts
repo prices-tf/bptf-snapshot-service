@@ -36,7 +36,7 @@ export class Listing {
   @Column({
     nullable: true,
   })
-  readonly details: string;
+  readonly comment: string;
 
   @Column({
     type: 'float',

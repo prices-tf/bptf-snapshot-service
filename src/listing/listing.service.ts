@@ -187,7 +187,7 @@ export class ListingService {
           isAutomatic: listing.userAgent !== undefined,
           isOffers: listing.offers === 1,
           isBuyout: listing.buyout === 1,
-          details: listing.details === '' ? null : listing.details,
+          comment: listing.details === '' ? null : listing.details,
           createdAt: new Date(listing.timestamp * 1000),
           bumpedAt: new Date(listing.bump * 1000),
         });
