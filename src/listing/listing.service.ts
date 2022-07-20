@@ -95,7 +95,7 @@ export class ListingService {
 
     const options: Bull.JobOptions = {
       jobId,
-      attempts: 3,
+      attempts: 5,
       backoff: {
         type: 'exponential',
         delay: 5000,
