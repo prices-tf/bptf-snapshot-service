@@ -1,5 +1,5 @@
 import { ListingIntent } from '../enums/listing-intent.enum';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, PrimaryColumn } from 'typeorm';
 import { Snapshot } from './snapshot.entity';
 
 @Entity()
@@ -54,6 +54,7 @@ export class Listing {
   @Column()
   readonly bumpedAt: Date;
 
+  @Index()
   @ManyToOne(() => Snapshot, (snapshot) => snapshot.listings)
   snapshot: Snapshot;
 }
