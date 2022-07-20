@@ -8,7 +8,7 @@ import {
 } from './dto/create-snapshot.dto';
 import { Listing } from './models/listing.entity';
 import { InjectQueue } from '@nestjs/bull';
-import Bull, { Queue } from 'bull';
+import Bull, { Job, Queue } from 'bull';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import {
   paginate,
@@ -22,6 +22,9 @@ import { SchemaService } from '../schema/schema.service';
 import { SkinService } from '../skin/skin.service';
 import { Item } from './interfaces/item.interface';
 import * as DataLoader from 'dataloader';
+import { QueueData } from './interfaces/queue.interface';
+
+type JobState = Bull.JobStatus | 'stuck';
 
 @Injectable()
 export class ListingService {
@@ -29,9 +32,7 @@ export class ListingService {
     private readonly schemaService: SchemaService,
     private readonly skinService: SkinService,
     @InjectQueue('snapshot')
-    private readonly queue: Queue<{
-      sku: string;
-    }>,
+    private readonly queue: Queue<QueueData>,
     private readonly amqpConnection: AmqpConnection,
     private readonly dataSource: DataSource,
   ) {}
@@ -51,77 +52,81 @@ export class ListingService {
     delay?: number,
     priority?: number,
     replace = true,
-  ): Promise<boolean> {
+  ): Promise<{
+    enqueued: boolean;
+    state: JobState;
+  }> {
     const jobId = sku;
 
     const job = await this.queue.getJob(jobId);
+    let state = job === null ? null : await job.getState();
 
-    if (job) {
-      const state = await job.getState();
+    let notQueued = job === null;
 
-      if (
-        replace === true &&
-        state !== 'active' &&
-        job.opts.priority !== priority
-      ) {
-        // Job has a different priority, replace it with new job
+    if (replace === true && job !== null) {
+      // Job is already in the queue, so we need to check its state to determine
+      // what we should do with it
+
+      // This check is redundant, but it's here for safety
+      if (state === 'completed' || state === 'failed') {
         await job.remove();
-      } else if (replace === true && state === 'delayed') {
-        // Job is delayed, figure out if it should be promoted, removed or ignored
+        notQueued = true;
+      } else if (state !== 'active' && job.opts.priority !== priority) {
+        // Job is not active and priorities are different, replace the job
+        await job.remove();
+        notQueued = true;
+      } else if (state === 'delayed') {
+        // Job is delayed, check if it should be promoted or replaced
+
         const now = new Date().getTime();
+
+        // Time for when the job state will change to "waiting"
         const delayEnd = job.timestamp + job.opts.delay;
 
-        if (delay == undefined) {
-          if (delayEnd > now) {
-            // Job is delayed, promote it to waiting
-            await job.promote();
-            return false;
-          }
+        if (delay === undefined || job.attemptsMade > 0) {
+          // Job should not have a delay, or it has been retried, promote it to "waiting"
+          await job.promote();
+          state = 'waiting';
         } else if (delayEnd > now + delay) {
-          // If job was made again with new delay then it would be processed earlier
+          // Job will become waiting later than now requested, replace it
           await job.remove();
-        } else {
-          // Job should not be updated
-          return false;
+          notQueued = true;
         }
-      } else if (state === 'completed' || state === 'failed') {
-        // Job is finished, remove it
-        await job.remove();
-      } else {
-        // Job already in the queue
-        return false;
       }
     }
 
-    const options: Bull.JobOptions = {
-      jobId,
-      attempts: 5,
-      backoff: {
-        type: 'exponential',
-        delay: 5000,
-      },
-      removeOnComplete: true,
-      removeOnFail: true,
-    };
+    let enqueued = false;
 
-    if (delay !== undefined) {
-      options.delay = delay;
-    }
-
-    if (priority !== undefined) {
-      options.priority = priority;
-    }
-
-    await this.queue.add(
-      {
+    if (notQueued === true) {
+      // Job is not in the queue, so we can add it
+      const data: QueueData = {
         sku,
-      },
-      options,
-    );
+      };
 
-    // Added job to queue
+      const options: Bull.JobOptions = {
+        jobId,
+        delay: delay ?? undefined,
+        priority: priority ?? undefined,
+        attempts: 5,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+        removeOnComplete: true,
+        removeOnFail: true,
+      };
 
-    return true;
+      // Add job to the queue
+      await this.queue.add(data, options);
+
+      enqueued = true;
+      state = 'waiting';
+    }
+
+    return {
+      enqueued,
+      state,
+    };
   }
 
   getListingsBySKU(sku: string): Promise<Snapshot> {

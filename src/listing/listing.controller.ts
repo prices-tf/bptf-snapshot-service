@@ -49,21 +49,20 @@ export class ListingController {
     body: RefreshSnapshotDto,
   ): Promise<{
     enqueued: boolean;
+    state: string;
   }> {
     if (!this.listingService.isValidSKU(sku)) {
       throw new BadRequestException('Invalid SKU');
     }
 
-    const enqueued = await this.listingService.enqueueSnapshot(
+    const result = await this.listingService.enqueueSnapshot(
       sku,
       body.delay,
       body.priority,
       body.replace,
     );
 
-    return {
-      enqueued,
-    };
+    return result;
   }
 
   @Get('/:sku')
