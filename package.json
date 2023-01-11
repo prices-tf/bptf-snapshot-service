@@ -33,7 +33,7 @@
     "body-parser": "^1.20.0",
     "bull": "^4.8.4",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.13.2",
+    "class-validator": "^0.14.0",
     "crypt": "^0.0.2",
     "crypto": "^1.0.1",
     "dataloader": "^2.1.0",
